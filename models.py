@@ -6,6 +6,7 @@ from peewee import *
 DATABASE = SqliteDatabase('todos.sqlite')
 HASHER = PasswordHasher()
 
+TodoDoesNotExist = DoesNotExist
 
 class Todo(Model):
     name = CharField()

@@ -13,7 +13,7 @@ app.register_blueprint(todos_api, url_prefix='/api/v1')
 
 limiter = Limiter(
     app,
-    global_limits=[config.DEFAULT_RATE],
+    default_limits=[config.DEFAULT_RATE],
     key_func=get_ipaddr
 )
 limiter.limit(

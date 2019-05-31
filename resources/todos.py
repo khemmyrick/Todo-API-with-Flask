@@ -19,7 +19,7 @@ todo_fields = {
 def todo_or_404(todo_id):
     try:
         todo = models.Todo.get(models.Todo.id == todo_id)
-    except models.Todo.DoesNotExist:
+    except models.TodoDoesNotExist:
         abort(404)
     else:
         return todo
@@ -70,16 +70,16 @@ class Todo(Resource):
     def put(self, id):
         args = self.reqparse.parse_args()
         try:
+            todo = models.Todo.get(models.Todo.id == id)
+        except models.TodoDoesNotExist:
+            abort(404)
+        else:
             query = models.Todo.update(**args).where(models.Todo.id == id)
-        except models.Todo.DoesNotExist:
-            return make_response(json.dumps(
-                    {"error": "That todo is not editable."}
-            ), 403)
-        query.execute()
-        return (
-            models.Todo.get(models.Todo.id == id), 200,
-            {"Location": url_for("resources.todos.todo", id=id)}
-        )
+            query.execute()
+            return (
+                models.Todo.get(models.Todo.id == id), 200,
+                {"Location": url_for("resources.todos.todo", id=id)}
+            )
 
     def delete(self, id):
         query = models.Todo.delete().where(models.Todo.id == id)
