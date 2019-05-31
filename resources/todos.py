@@ -8,7 +8,8 @@ from flask_restful import (Resource, Api, reqparse,
 import models
 
 todo_fields = {
-    'name': fields.String
+    'name': fields.String,
+    'completed': fields.Boolean
 }
 # flask restful's list and url fields don't play nice together
 
