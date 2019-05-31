@@ -1,22 +1,24 @@
-from flask import jsonify, Blueprint, abort
+import json
+
+from flask import Blueprint, abort, make_response
 
 from flask_restful import (Resource, Api, reqparse,
-                           inputs, fields, marshal,
+                           fields, marshal,
                            marshal_with, url_for)
-# https://teamtreehouse.com/community/no-module-named-flaskext
 
 import models
 
+
 todo_fields = {
+    'id': fields.Integer,
     'name': fields.String,
     'completed': fields.Boolean
 }
-# flask restful's list and url fields don't play nice together
 
 
 def todo_or_404(todo_id):
     try:
-        todo = models.Todo.get(models.Todo.id==todo_id)
+        todo = models.Todo.get(models.Todo.id == todo_id)
     except models.Todo.DoesNotExist:
         abort(404)
     else:
@@ -36,20 +38,16 @@ class TodoList(Resource):
 
     def get(self):
         todos = [marshal(todo, todo_fields)
-                   for todo in models.Todo.select()]
+                 for todo in models.Todo.select()]
         return todos
-        # todos = models.Todo.select()
-        # todos = Todo.query.all()
-        # return {'todos': todos}
-        # return models.SERIALIZER.dumps({'todos': todos})
 
     @marshal_with(todo_fields)
     def post(self):
         args = self.reqparse.parse_args()
         todo = models.Todo.create(**args)
         return (
-            todo,
-            201, {'Location': url_for('resources.todos.todo', id=todo.id)}
+            todo, 201,
+            {'Location': url_for('resources.todos.todo', id=todo.id)}
         )
 
 
@@ -71,15 +69,20 @@ class Todo(Resource):
     @marshal_with(todo_fields)
     def put(self, id):
         args = self.reqparse.parse_args()
-        query = models.Todo.update(**args).where(models.Todo.id==id)
+        try:
+            query = models.Todo.update(**args).where(models.Todo.id == id)
+        except models.Todo.DoesNotExist:
+            return make_response(json.dumps(
+                    {"error": "That todo is not editable."}
+            ), 403)
         query.execute()
         return (
-            models.Todo.get(models.Todo.id==id),
-            200, {'Location': url_for('resources.todos.todo', id=id)}
+            models.Todo.get(models.Todo.id == id), 200,
+            {"Location": url_for("resources.todos.todo", id=id)}
         )
 
     def delete(self, id):
-        query = models.Todo.delete().where(models.Todo.id==id)
+        query = models.Todo.delete().where(models.Todo.id == id)
         query.execute()
         return '', 204, {'Location': url_for('resources.todos.todos')}
 
