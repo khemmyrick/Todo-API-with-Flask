@@ -17,6 +17,9 @@ todo_fields = {
 
 
 def todo_or_404(todo_id):
+    '''Makes a get request for a todo, and returns the result.
+    Else, catches DoesNotExist exception and calls flask.abort with a 404.
+    '''
     try:
         todo = models.Todo.get(models.Todo.id == todo_id)
     except models.TodoDoesNotExist:
@@ -26,6 +29,7 @@ def todo_or_404(todo_id):
 
 
 class TodoList(Resource):
+    '''A Flask resource for handling requests on the entire todo list.'''
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
@@ -52,6 +56,7 @@ class TodoList(Resource):
 
 
 class Todo(Resource):
+    '''A Flask resource for handling requests for individual todos.'''
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(

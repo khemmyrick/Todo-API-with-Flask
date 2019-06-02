@@ -18,4 +18,4 @@ A fellow student of yours in the Full Stack JavaScript Techdegree has just taken
 ## Running Tests
 - User coverage to unit test the project.  
 `coverage run tests.py`  
-`coverage report`  
+`coverage report -m`  

@@ -35,10 +35,12 @@ class ViewTestCase(unittest.TestCase):
 
 
 class TodoViewsTestCase(ViewTestCase):
-    def test_empty_db(self):
+    def test_get_empty_db(self):
         with test_database(TEST_DB, (Todo,)):
-            rv = self.app.get('/')
+            rv = self.app.get('/api/v1/todos')
             self.assertEqual(rv.status_code, 200)
+            rv1 = self.app.get('/api/v1/todos/1')
+            self.assertEqual(rv1.status_code, 404)
 
     def test_todo_create(self):
         todo_data = {
@@ -49,6 +51,8 @@ class TodoViewsTestCase(ViewTestCase):
             self.assertEqual(rv.status_code, 201)
             self.assertEqual(rv.location, 'http://localhost/api/v1/todos/1')
             self.assertEqual(Todo.select().count(), 1)
+            rv1 = self.app.get('/api/v1/todos/1')
+            self.assertEqual(rv1.status_code, 200)
 
     def test_todo_list(self):
         todo_data = {
@@ -67,6 +71,8 @@ class TodoViewsTestCase(ViewTestCase):
             rv1 = self.app.post('/api/v1/todos', data=todo_data)
             rv2 = self.app.delete('/api/v1/todos/1')
             self.assertEqual(rv2.status_code, 204)
+            rv3 = self.app.get('/api/v1/todos/1')
+            self.assertEqual(rv3.status_code, 404)
 
     def test_todo_update(self):
         todo_data = {
@@ -82,6 +88,8 @@ class TodoViewsTestCase(ViewTestCase):
             self.assertEqual(Todo.select().count(), 1)
             rv3 = self.app.get('api/v1/todos/1')
             self.assertIn('todo won', str(rv3.data))
+            rv4 = self.app.get('/api/v1/todos')
+            self.assertNotIn(todo_data['name'], rv4.get_data(as_text=True))
 
     def test_todo_update_bad(self):
         new_data = {
